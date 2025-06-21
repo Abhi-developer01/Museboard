@@ -12,7 +12,7 @@ export const appwriteConfig = {
 
 export const client = new Client();
 
-client.setEndpoint(appwriteConfig.url);
+client.setEndpoint("/api/appwrite");
 client.setProject(appwriteConfig.projectId);
 
 export const account = new Account(client);

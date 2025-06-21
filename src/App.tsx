@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import {
   Home,
@@ -17,12 +18,23 @@ import SignupForm from "@/_auth/forms/SignupForm";
 import SigninForm from "@/_auth/forms/SigninForm";
 import OAuthCallback from "./_auth/pages/OAuthCallback";
 import { Toaster } from "@/components/ui/toaster";
+import LinkedInModal from "./components/shared/LinkedInModal";
 
 import "./globals.css";
 
 const App = () => {
+  const [showLinkedInModal, setShowLinkedInModal] = useState(false);
+
+  useEffect(() => {
+    if (navigator.userAgent.includes("LinkedIn")) {
+      setShowLinkedInModal(true);
+    }
+  }, []);
+
   return (
     <main className="flex h-screen">
+      {showLinkedInModal && <LinkedInModal />}
+
       <Routes>
         <Route path="/auth/callback" element={<OAuthCallback />} />
 

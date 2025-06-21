@@ -4,6 +4,10 @@
     },
     "rewrites": [
         {
+            "source": "/api/appwrite/(.*)",
+            "destination": "https://fra.cloud.appwrite.io/v1/$1"
+        },
+        {
             "source": "/(.*)",
             "destination": "/"
         }
