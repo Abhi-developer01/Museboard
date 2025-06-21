@@ -76,8 +76,9 @@ export async function signInAccount(user: { email: string; password: string }) {
 export async function signInWithGoogle() {
   try {
     await account.createOAuth2Session(
-      'google',
-      `${window.location.origin}/`
+      "google",
+      `${window.location.origin}/home`,
+      `${window.location.origin}/sign-in`
     );
   } catch (error) {
     console.log(error);
