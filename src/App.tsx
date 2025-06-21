@@ -15,6 +15,7 @@ import AuthLayout from "./_auth/AuthLayout";
 import RootLayout from "./_root/RootLayout";
 import SignupForm from "@/_auth/forms/SignupForm";
 import SigninForm from "@/_auth/forms/SigninForm";
+import OAuthCallback from "./_auth/pages/OAuthCallback";
 import { Toaster } from "@/components/ui/toaster";
 
 import "./globals.css";
@@ -23,6 +24,8 @@ const App = () => {
   return (
     <main className="flex h-screen">
       <Routes>
+        <Route path="/auth/callback" element={<OAuthCallback />} />
+
         {/* public routes */}
         <Route element={<AuthLayout />}>
           <Route index element={<SigninForm />} />
