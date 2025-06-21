@@ -1,4 +1,5 @@
 import { Outlet, Navigate } from "react-router-dom";
+import InAppBrowserWarning from "@/components/shared/InAppBrowserWarning";
 
 import { useUserContext } from "@/context/AuthContext";
 
@@ -12,6 +13,7 @@ export default function AuthLayout() {
       ) : (
         <>
           <section className="flex flex-1 justify-center items-center flex-col py-10">
+            <InAppBrowserWarning />
             <Outlet />
           </section>
 
