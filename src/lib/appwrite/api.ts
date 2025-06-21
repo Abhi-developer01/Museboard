@@ -1,7 +1,7 @@
 import { ID, Query, Permission, Role } from "appwrite";
 
 import { appwriteConfig, account, databases, storage, avatars } from "./config";
-import { IUpdatePost, INewPost, INewUser, IUpdateUser } from "@/types";
+import { IUpdatePost, INewPost, INewUser, IUpdateUser, IUser } from "@/types";
 
 // ============================================================
 // AUTH
@@ -97,23 +97,24 @@ export async function getAccount() {
 }
 
 // ============================== GET USER
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<IUser> {
   try {
     const currentAccount = await getAccount();
 
     if (!currentAccount) throw new Error("No current account found");
 
-    const currentUser = await databases.listDocuments(
+    let currentUser = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
       [Query.equal("accountId", currentAccount.$id)]
     );
 
-    if (!currentUser || currentUser.documents.length === 0) {
-      // If user is authenticated but not in DB, create them
+    let userDoc = currentUser.documents[0];
+
+    if (!userDoc) {
       console.log("User authenticated but not in DB. Creating new user...");
       const avatarUrl = avatars.getInitials(currentAccount.name);
-      const newUser = await saveUserToDB({
+      const newUserDoc = await saveUserToDB({
         accountId: currentAccount.$id,
         name: currentAccount.name,
         email: currentAccount.email,
@@ -121,28 +122,31 @@ export async function getCurrentUser() {
         imageUrl: avatarUrl,
       });
 
-      if (!newUser) {
+      if (!newUserDoc) {
         throw new Error("Failed to create new user in database.");
       }
-      // After creating the new user, we can proceed with this new user object.
-      currentUser.documents[0] = newUser;
+      userDoc = newUserDoc;
     }
 
-    const user = currentUser.documents[0];
-
-    // Fetch the user's saved posts
     const savedPosts = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.savesCollectionId,
-      [Query.equal("user", user.$id)]
+      [Query.equal("user", userDoc.$id)]
     );
 
-    const userWithSaves = {
-      ...user,
+    const user: IUser = {
+      $id: userDoc.$id,
+      id: currentAccount.$id,
+      name: userDoc.name,
+      username: userDoc.username,
+      email: userDoc.email,
+      imageUrl: userDoc.imageUrl,
+      imageId: userDoc.imageId,
+      bio: userDoc.bio,
       save: savedPosts.documents,
     };
 
-    return userWithSaves;
+    return user;
   } catch (error) {
     console.error(error);
     throw error;
@@ -617,28 +621,37 @@ export async function getUsers(limit?: number) {
 }
 
 // ============================== GET USER BY ID
-export async function getUserById(userId: string) {
+export async function getUserById(userId: string): Promise<IUser> {
   try {
-    const user = await databases.getDocument(
+    const userDoc = await databases.getDocument(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
       userId
     );
 
-    if (!user) throw Error;
+    if (!userDoc) throw new Error(`User with ID ${userId} not found.`);
 
     const posts = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.postCollectionId,
-      [Query.equal("creator", user.$id)]
+      [Query.equal("creator", userDoc.$id)]
     );
 
-    if (!posts) throw Error;
+    if (!posts) throw new Error(`Posts for user with ID ${userId} not found.`);
 
-    return {
-      ...user,
+    const user: IUser = {
+      $id: userDoc.$id,
+      id: userDoc.$id,
+      name: userDoc.name,
+      username: userDoc.username,
+      email: userDoc.email,
+      imageUrl: userDoc.imageUrl,
+      imageId: userDoc.imageId,
+      bio: userDoc.bio,
       posts: posts.documents,
     };
+
+    return user;
   } catch (error) {
     console.error(error);
     throw error;

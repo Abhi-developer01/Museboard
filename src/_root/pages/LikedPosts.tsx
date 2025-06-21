@@ -13,14 +13,12 @@ const LikedPosts = () => {
 
   return (
     <>
-      {currentUser.save.length === 0 && (
+      {(!currentUser.save || currentUser.save.length === 0) && (
         <p className="text-light-4">No liked posts</p>
       )}
 
       <GridPostList
-        posts={currentUser.save
-          .map((record: any) => record.post)
-          .filter((post) => post)}
+        posts={currentUser.save?.map((record: any) => record.post).filter(Boolean) ?? []}
         showUser={false}
         showStats={false}
       />
