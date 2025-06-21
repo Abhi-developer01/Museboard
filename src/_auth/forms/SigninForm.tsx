@@ -1,7 +1,7 @@
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,6 @@ import { signInWithGoogle } from "@/lib/appwrite/api";
 
 const SigninForm = () => {
   const { toast } = useToast();
-  const navigate = useNavigate();
   const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
 
   // Query
@@ -43,10 +42,13 @@ const SigninForm = () => {
       return;
     }
 
-    await checkAuthUser();
+    const isLoggedIn = await checkAuthUser();
+
+    if (!isLoggedIn) {
+      toast({ title: "Login failed. Please try again." });
+    }
 
     form.reset();
-    navigate("/");
   };
 
   return (
